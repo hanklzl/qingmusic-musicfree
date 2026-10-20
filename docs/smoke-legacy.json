@@ -1,0 +1,148 @@
+{
+  "checkedAt": "2026-10-20T14:13:19.299Z",
+  "results": [
+    {
+      "id": "kw",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空-《九五2班》网络电影插曲",
+          "rid": "5886682",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "cb98c2bae299d73fe7c75b37617f59d2fefd96aaa6a48a58e0cc9ad10bbecd72",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 942
+        }
+      ]
+    },
+    {
+      "id": "kg",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "rid": "C41E80A18D1448FA47086372999C7F43",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "application/octet-stream",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "cb98c2bae299d73fe7c75b37617f59d2fefd96aaa6a48a58e0cc9ad10bbecd72",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 998
+        }
+      ]
+    },
+    {
+      "id": "wy",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "rid": 1357375695,
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg; charset=UTF-8",
+              "bytes": 4096,
+              "signature": "494433040000000000235453",
+              "sampleSha256": "18ebd130740e6376a17a01c8b2fa9a70898b0258a13bd626fd42a99753e8f303",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 786
+        }
+      ]
+    },
+    {
+      "id": "tx",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "rid": 4835784,
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "faab01fcb756e0f2b28a061a5529c56767035e1d2877f56a21395997b79b3aad",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 990
+        }
+      ]
+    },
+    {
+      "id": "bili",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "rid": "BV1WKg3z5Ehi",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "application/octet-stream",
+              "bytes": 4096,
+              "signature": "000000246674797069736f6d",
+              "sampleSha256": "c8dada55487216e08665780e6d191a8de570d1535165963e0afcbcef7a472986",
+              "audio": true,
+              "decoded": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mg",
+      "mode": "saved-item-fixture",
+      "searchCount": 0,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "rid": "1135162566",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "4944330300000000004b544c",
+              "sampleSha256": "96e1601cbe66c26f8894dd4f78b866e0939d5855fa0d6178732286c8fe32bedd",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 773
+        }
+      ]
+    }
+  ]
+}

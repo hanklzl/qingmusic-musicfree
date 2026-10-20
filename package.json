@@ -1,6 +1,6 @@
 {
   "name": "qingmusic-musicfree",
-  "version": "1.0.0",
+  "version": "1.2.2",
   "private": true,
   "description": "QingMusic JSON to standalone MusicFree plugins",
   "license": "MIT",

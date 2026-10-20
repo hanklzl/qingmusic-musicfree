@@ -6,6 +6,22 @@
 
 ## 安装
 
+### 已有旧元力插件和歌单：使用同名兼容订阅
+
+```text
+https://hanklzl.github.io/qingmusic-musicfree/plugins.compat.json
+```
+
+备用：`https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/plugins.compat.raw.json`
+
+保留原六个 `platform` 名称：`元力QQ`、`元力KG`、`元力KW`、`元力WY`、`元力MG`、`bilibili`，并保留其主键字段。版本为 1.2.2，高于当日旧元力 1.2.1。QQ 兼容旧数字 ID＋songmid，酷狗保留 album_id/album_audio_id，咪咕保留 copyrightId；不会按标题猜歌或修改已保存的歌曲。
+
+先备份歌单，再从网络安装这个兼容订阅并确认同名覆盖，**不用先卸载旧插件或重新导入已保存的歌曲**。覆盖完成后，插件的更新地址会指向本仓库。旧第三方订阅 URL 不受本项目控制，不能零操作替换；请停止用旧订阅更新，避免重新装回失效版本。该兼容版只针对上述精确名称，不会替换独立的“网易音乐”等其它插件。
+
+这解决的是旧插件身份与本地歌单歌曲的播放/歌词兼容，不代表旧插件所有远程歌单、榜单、歌手/专辑浏览能力已经移植。没有设备端升级实测，不承诺所有历史数据都能无损兼容。
+
+### 新装或希望两套插件并存：青听名称订阅
+
 MusicFree → 设置 → 插件设置 → 从网络安装，粘贴订阅：
 
 ```text
@@ -18,7 +34,7 @@ https://hanklzl.github.io/qingmusic-musicfree/plugins.json
 https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/plugins.raw.json
 ```
 
-六个插件名称均以“青听”开头，与旧元力插件分开。建议安装后选择“青听QQ”或“青听酷狗”搜索，再播放；既有歌单歌曲仍属于旧插件，不会自动迁移来源。也可以单独下载 `docs/qing-*.js` 后从本地安装。
+此版本六个插件名称均以“青听”开头，与旧元力插件分开。建议安装后选择“青听QQ”或“青听酷狗”搜索，再播放；既有歌单歌曲仍属于旧插件，不会自动迁移来源。也可以单独下载 `docs/qing-*.js` 后从本地安装。使用 `docs/yuanli-*.js` 则属于同名覆盖兼容版。
 
 ## 能力和限制
 
@@ -26,7 +42,7 @@ https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/plugins.
 - 首版未移植歌单、排行榜、歌手、专辑列表等非配置声明能力；不声称覆盖 MusicFree 全部 API。
 - 五个音乐平台使用青听当前公开解析网关；哔哩哔哩使用官方 DASH 接口。未内置青听客户端签名密钥、用户账号、设备凭证或媒体解密密钥。
 - 普通音质已验证搜索、HTTP 音频读取和 FFmpeg 解码；证据见发布目录 `smoke-*.json`。这不是手机端完整播放验收，也不保证所有歌曲、地区、VIP/无损档位或长期稳定性。
-- 标准 `standard` → 青听 `standard`；高音质 `high` → `exhigh`；超高 `super` → `lossless`。仅暴露配置声明的映射。`low` 无对应档位，返回不可用并交给播放器既有回退策略。哔哩哔哩只走 `standard`。
+- 标准 `standard` → 青听 `standard`；高音质 `high` → `exhigh`；超高 `super` → `lossless`。仅暴露配置声明的映射。五个音乐平台的 `low` 无对应档位，返回不可用并交给播放器既有回退策略。青听名称版哔哩哔哩只走 `standard`；旧名兼容版按旧插件的四档规则选择现有音轨，以兼容已保存的偏好。
 - 音质参数只是向上游提出的请求，不是实际音质保证：已观测到酷我 `lossless` 仍返回 MP3；因此插件不凭请求档位宣称已获得无损。QQ、酷狗、网易样本在 `lossless` 档返回 FLAC 并通过解码，但不能推广到所有歌曲。
 - 拒绝需要 QMC/CENC 等专属解密或依赖青听本地代理的结果。不得将“返回一个 URL”等同于能够播放。
 - 咪咕搜索没有可靠时长，使用 `duration=0` 表示未知；网易封面可通过按需详情补齐。
@@ -51,12 +67,13 @@ npm run build
 node build.cjs --source https://13413.kstore.vip/QingMusic/music.json --base-url https://example.org/musicfree/ --out dist
 ```
 
-输出六个 JS、`plugins.json` 和规范化配置。只接受已实现的六组 `id/searchApi/detailApi`，未知函数拒绝生成；不执行远程 JSON 的任何代码。禁用的线路从本次生成清单中省略，不会替用户卸载已安装插件。调整接口实现后需升级 `lib/converter.cjs` 中版本并重新生成。
+输出两套各六个 JS、正常/兼容两套订阅和规范化配置。只接受已实现的六组 `id/searchApi/detailApi`，未知函数拒绝生成；不执行远程 JSON 的任何代码。禁用的线路从本次生成清单中省略，不会替用户卸载已安装插件。调整接口实现后需升级 `lib/converter.cjs` 中版本并重新生成。
 
 显式真网检查（默认单测完全离线）：
 
 ```bash
 npm run probe -- --decode --report docs/smoke-current.json
+node probe.cjs --plugins docs --variant compat --fixtures tests/fixtures/legacy-items.json --decode --report docs/smoke-legacy.json
 ```
 
 `--decode` 额外需要 FFmpeg，只解码各首歌前 1 秒。检查结果不保存播放 URL、签名、票据或原始响应。克制访问第三方服务，避免批量高频调用。配置更新不会自动等于接口实现更新，也不在本工具中创建定时任务。

@@ -1,11 +1,18 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-function load(name, http) {
+function load(name, http, options = { legacy: true }) {
   const factory = require('../adapters/' + name + '.cjs');
   // Generated plugins embed the factory source, without CommonJS scope.
-  return (0, eval)('(' + factory.toString() + ')')({ http, he: { decode: s => s.replace(/&amp;/g, '&') }, line: {} });
+  return (0, eval)('(' + factory.toString() + ')')({ http, he: { decode: s => s.replace(/&amp;/g, '&') }, line: {}, ...options });
 }
+
+test('normal QingMusic variant keeps its highest-bandwidth standard audio behavior', async () => {
+  const adapter = load('bili', { get: async () => ({ data: { code: 0, data: { dash: { audio: [
+    { bandwidth: 64000, baseUrl: 'https://low' }, { bandwidth: 128000, baseUrl: 'https://medium' }, { bandwidth: 192000, baseUrl: 'https://highest' }
+  ] } } } }) }, { legacy: false });
+  assert.equal((await adapter.getMediaSource({ id: 'BVtest', cid: 88 }, 'standard')).url, 'https://highest');
+});
 
 test('wy maps public song fields and uses zero-based search offset', async () => {
   const adapter = load('wy', { get: async (url, config) => {
@@ -55,7 +62,7 @@ test('bili decodes titles, duration, cover and keeps bvid/aid across pagination'
   assert.deepEqual(result.data[0], { id: 'BVtest', rid: 'BVtest', bvid: 'BVtest', aid: '123', title: '海阔天空 & Live', artist: 'Beyond', album: '', artwork: 'https://cover', duration: 3927 });
 });
 
-test('bili resolves cid and returns highest bandwidth DASH audio with required headers', async () => {
+test('bili resolves cid and returns standard DASH audio with required headers', async () => {
   const calls = [];
   const adapter = load('bili', { get: async (url, config) => {
     calls.push(url);
@@ -79,4 +86,67 @@ test('bili preserves supplied cid and reports missing audio rather than video fa
     return { data: { code: 0, data: { dash: { audio: [] }, durl: [{ url: 'https://video' }] } } };
   } });
   await assert.rejects(adapter.getMediaSource({ id: 'BVtest', cid: 88 }), /audio/i);
+});
+
+test('bili maps legacy quality names to ascending bandwidth ranks', async () => {
+  const adapter = load('bili', { get: async () => ({ data: { code: 0, data: { dash: { audio: [
+    { bandwidth: 192000, baseUrl: 'https://third' },
+    { bandwidth: 64000, baseUrl: 'https://first' },
+    { bandwidth: 256000, base_url: 'https://fourth' },
+    { bandwidth: 128000, baseUrl: 'https://second' },
+  ] } } } }) });
+  const item = { id: 'BVtest', cid: 88 };
+  for (const [quality, url] of Object.entries({ low: 'https://first', standard: 'https://second', high: 'https://third', super: 'https://fourth' })) {
+    assert.equal((await adapter.getMediaSource(item, quality)).url, url, quality);
+  }
+});
+
+test('bili clamps legacy quality rank when fewer audio streams exist', async () => {
+  const adapter = load('bili', { get: async () => ({ data: { code: 0, data: { dash: { audio: [
+    { bandwidth: 64000, baseUrl: 'https://only' },
+  ] } } } }) });
+  for (const quality of ['low', 'standard', 'high', 'super']) {
+    assert.equal((await adapter.getMediaSource({ id: 'BVtest', cid: 88 }, quality)).url, 'https://only');
+  }
+});
+
+test('bili rejects unknown quality before requesting an upstream stream', async () => {
+  let requests = 0;
+  const adapter = load('bili', { get: async () => {
+    requests++;
+    return { data: { code: 0, data: { dash: { audio: [{ baseUrl: 'https://audio', bandwidth: 64000 }] } } } };
+  } });
+  await assert.rejects(adapter.getMediaSource({ id: 'BVtest', cid: 88 }, 'lossless'), /unsupported.*quality/i);
+  assert.equal(requests, 0);
+});
+
+test('bili uses aid for legacy numeric item pagelist and avid for playurl', async () => {
+  const calls = [];
+  const adapter = load('bili', { get: async (url, config) => {
+    calls.push(url);
+    if (url.endsWith('/pagelist')) {
+      assert.equal(config.params.aid, '123');
+      assert.equal(config.params.avid, undefined);
+      return { data: { code: 0, data: [{ cid: 88 }] } };
+    }
+    assert.equal(config.params.avid, '123');
+    assert.equal(config.params.aid, undefined);
+    assert.equal(config.params.cid, 88);
+    return { data: { code: 0, data: { dash: { audio: [{ bandwidth: 64000, baseUrl: 'https://legacy' }] } } } };
+  } });
+  const source = await adapter.getMediaSource({ id: 123, aid: 123 }, 'low');
+  assert.equal(source.url, 'https://legacy');
+  assert.equal(source.headers.Referer, 'https://www.bilibili.com/video/av123');
+  assert.equal(calls.length, 2);
+});
+
+test('bili plays persisted aid-only items with supplied cid directly', async () => {
+  const adapter = load('bili', { get: async (url, config) => {
+    assert.match(url, /\/playurl$/);
+    assert.equal(config.params.avid, '123');
+    assert.equal(config.params.cid, 88);
+    assert.equal(config.params.bvid, undefined);
+    return { data: { code: 0, data: { dash: { audio: [{ bandwidth: 64000, baseUrl: 'https://legacy' }] } } } };
+  } });
+  assert.equal((await adapter.getMediaSource({ id: 123, aid: 123, cid: 88 }, 'standard')).url, 'https://legacy');
 });

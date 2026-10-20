@@ -51,6 +51,48 @@ test('mg fetches public lyric URL and normalizes carriage returns', async () => 
   assert.deepEqual(await adapter.getLyric({ lyricUrl: 'https://example.test/song.lrc' }), { rawLrc: '[00:01.00]hello\n' });
 });
 
+test('mg resolves lyrics for old saved songs using their song ID and copyright ID', async () => {
+  const requests = [];
+  const adapter = load('mg', { get: async (url, options) => {
+    requests.push(url);
+    if (requests.length === 1) {
+      assert.equal(url, 'https://c.musicapp.migu.cn/MIGUM3.0/resource/song/by-contentids/v2.0');
+      assert.equal(options.params.contentId, '1135162566');
+      return { data: { code: '000000', data: [
+        { songId: 'other', copyrightId: 'other', lrcUrl: 'https://example.test/wrong.lrc' },
+        { songId: '1135162566', contentId: '600913000009337537', copyrightId: '6005752DXKE', lrcUrl: 'https://example.test/song.lrc' }
+      ] } };
+    }
+    assert.equal(url, 'https://example.test/song.lrc');
+    return { data: '[00:01.00]海阔天空\r\n' };
+  } });
+  assert.deepEqual(await adapter.getLyric({ id: '1135162566', copyrightId: '6005752DXKE' }), { rawLrc: '[00:01.00]海阔天空\n' });
+  assert.equal(requests.length, 2);
+});
+
+test('mg uses an existing content ID for the public detail lookup', async () => {
+  const adapter = load('mg', { get: async (url, options) => {
+    if (options.params) {
+      assert.equal(options.params.contentId, '600913000009337537');
+      return { data: { code: '000000', data: [{ songId: '1135162566', contentId: '600913000009337537', lrcUrl: 'https://example.test/song.lrc' }] } };
+    }
+    return { data: '[00:01.00]hello' };
+  } });
+  assert.equal((await adapter.getLyric({ id: '1135162566', contentId: '600913000009337537' })).rawLrc, '[00:01.00]hello');
+});
+
+test('mg rejects unavailable or mismatched lyric metadata instead of empty success', async () => {
+  for (const song of [{ songId: '1' }, { songId: 'other', lrcUrl: 'https://example.test/wrong.lrc' }]) {
+    const adapter = load('mg', { get: async () => ({ data: { code: '000000', data: [song] } }) });
+    await assert.rejects(adapter.getLyric({ id: '1' }), /Migu lyric/);
+  }
+});
+
+test('mg rejects an empty lyric document instead of reporting success', async () => {
+  const adapter = load('mg', { get: async () => ({ data: '  \r\n' }) });
+  await assert.rejects(adapter.getLyric({ id: '1', lyricUrl: 'https://example.test/empty.lrc' }), /Migu lyric/);
+});
+
 test('mg uses the public endpoint page size of 20 for pagination', async () => {
   const adapter = load('mg', { get: async (_, options) => {
     assert.equal(options.params.pageSize, 20);

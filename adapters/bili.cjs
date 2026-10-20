@@ -30,18 +30,24 @@ module.exports = function createAdapter(ctx) {
       const pages = data.pageinfo && data.pageinfo.video && data.pageinfo.video.pages || data.numPages;
       return { data: videos.map(mapVideo), isEnd: videos.length === 0 || (pages ? page >= Number(pages) : videos.length < 20) };
     },
-    async getMediaSource(item) {
+    async getMediaSource(item, quality = 'standard') {
+      const qualityRank = ['low', 'standard', 'high', 'super'].indexOf(quality);
+      if (qualityRank < 0) throw new Error('Unsupported Bilibili quality: ' + String(quality));
       const id = String(item.bvid || item.rid || item.id);
       const identity = id.startsWith('BV') ? { bvid: id } : { avid: String(item.aid || id) };
       let cid = item.cid;
       if (!cid) {
-        const pages = await request('/x/player/pagelist', identity);
+        // These two official endpoints use different names for a numeric video ID.
+        const pageIdentity = identity.bvid ? identity : { aid: identity.avid };
+        const pages = await request('/x/player/pagelist', pageIdentity);
         cid = pages && pages[0] && pages[0].cid;
       }
       if (!cid) throw new Error('Bilibili video has no cid');
       const data = await request('/x/player/playurl', Object.assign({}, identity, { cid, fnval: 16, fnver: 0, fourk: 1 }));
       const audio = data && data.dash && data.dash.audio || [];
-      const selected = audio.filter(track => track.baseUrl || track.base_url).sort((a, b) => Number(b.bandwidth || 0) - Number(a.bandwidth || 0))[0];
+      const sortedAudio = audio.filter(track => track.baseUrl || track.base_url).sort((a, b) => Number(a.bandwidth || 0) - Number(b.bandwidth || 0));
+      const audioIndex = !ctx.legacy || quality === 'super' ? sortedAudio.length - 1 : Math.min(qualityRank, sortedAudio.length - 1);
+      const selected = sortedAudio[audioIndex];
       if (!selected) throw new Error('Bilibili DASH audio unavailable');
       const referer = 'https://www.bilibili.com/video/' + (identity.bvid || 'av' + identity.avid);
       return { url: selected.baseUrl || selected.base_url, headers: { Referer: referer, 'User-Agent': userAgent }, userAgent };

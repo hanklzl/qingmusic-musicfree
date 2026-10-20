@@ -15,16 +15,19 @@ async function main() {
   } else text = await fs.readFile(source, 'utf8');
   const config = parseConfig(text);
   const adapters = Object.fromEntries(config.lines.filter(l => l.enabled !== false).map(l => [l.id, require('./adapters/' + l.id + '.cjs')]));
-  const compiled = compilePlugins(config, { baseUrl: value('--base-url'), adapters });
   const out = path.resolve(value('--out'));
   await fs.mkdir(out, { recursive: true });
-  for (const [name, script] of Object.entries(compiled.scripts)) await fs.writeFile(path.join(out, name), script);
-  await fs.writeFile(path.join(out, 'plugins.json'), JSON.stringify(compiled.manifest, null, 2) + '\n');
-  if (args.includes('--raw-base-url')) {
-    const raw = compilePlugins(config, { baseUrl: value('--raw-base-url'), adapters });
-    await fs.writeFile(path.join(out, 'plugins.raw.json'), JSON.stringify(raw.manifest, null, 2) + '\n');
+  for (const legacy of [false, true]) {
+    const suffix = legacy ? '.compat' : '';
+    const compiled = compilePlugins(config, { baseUrl: value('--base-url'), adapters, legacy });
+    for (const [name, script] of Object.entries(compiled.scripts)) await fs.writeFile(path.join(out, name), script);
+    await fs.writeFile(path.join(out, 'plugins' + suffix + '.json'), JSON.stringify(compiled.manifest, null, 2) + '\n');
+    if (args.includes('--raw-base-url')) {
+      const raw = compilePlugins(config, { baseUrl: value('--raw-base-url'), adapters, legacy });
+      await fs.writeFile(path.join(out, 'plugins' + suffix + '.raw.json'), JSON.stringify(raw.manifest, null, 2) + '\n');
+    }
   }
   await fs.writeFile(path.join(out, 'qingmusic-config.json'), JSON.stringify(config, null, 2) + '\n');
-  console.log(JSON.stringify({ count: compiled.manifest.plugins.length, out }));
+  console.log(JSON.stringify({ countPerVariant: config.lines.filter(l => l.enabled !== false).length, variants: 2, out }));
 }
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });

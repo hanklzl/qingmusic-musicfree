@@ -2,8 +2,26 @@
 (function(){var http=require("axios");var crypto=require("crypto-js");var he=require("he");
 module.exports=(function createPlugin(options, createAdapter, dependencies) {
   const line = options.line;
-  const adapter = createAdapter({ http: dependencies.http, crypto: dependencies.crypto, he: dependencies.he, line });
+  const adapter = createAdapter({ http: dependencies.http, crypto: dependencies.crypto, he: dependencies.he, line, legacy: !!options.legacy });
   const levels = { standard: 'standard', high: 'exhigh', super: 'lossless' };
+  function inputItem(item) {
+    const prepared = Object.assign({}, item);
+    prepared.rid = String(line.id === 'tx' ? item.songmid || item.rid || item.id || '' : item.rid || item.id || '');
+    return prepared;
+  }
+  function outputItem(item) {
+    const output = Object.assign({}, item, { id: String(item.id), platform: options.platform });
+    if (options.legacy && line.id === 'tx') {
+      output.id = String(item.songid || item.id);
+      output.songmid = String(item.songmid || item.rid || item.id);
+      output.rid = output.songmid;
+    }
+    if (options.legacy && line.id === 'kg') {
+      output.album_id = String(item.album_id || item.albumId || '');
+      output.album_audio_id = item.album_audio_id === undefined ? 0 : item.album_audio_id;
+    }
+    return output;
+  }
   function report(method, error) {
     console.error('[qingmusic] ' + method + ' failed: ' + String(error && error.message || error));
   }
@@ -26,25 +44,26 @@ module.exports=(function createPlugin(options, createAdapter, dependencies) {
     platform: options.platform,
     author: 'MusicFree QingMusic Adapter',
     version: options.version,
-    primaryKey: ['id'],
+    primaryKey: options.primaryKey || ['id'],
     cacheControl: 'no-cache',
     supportedSearchType: ['music'],
     defaultSearchType: 'music',
-    description: '青听配置适配：' + line.name + '。第三方接口可用性由上游决定；不提供青听专属解密。',
+    description: (options.legacy ? '旧元力插件身份兼容版；' : '') + '青听配置适配：' + line.name + '。第三方接口可用性由上游决定；不提供青听专属解密。',
     async search(query, page, type) {
       if (type && type !== 'music') return { data: [], isEnd: true };
       if (!Number.isInteger(page) || page < 1) throw new Error('INVALID_PAGE');
       try {
         const result = await adapter.search(query, page);
         if (!result || !Array.isArray(result.data)) throw new Error('INVALID_SEARCH_RESPONSE');
-        return { data: result.data.map(item => Object.assign({}, item, { id: String(item.id), platform: options.platform })), isEnd: !!result.isEnd };
+        return { data: result.data.map(outputItem), isEnd: !!result.isEnd };
       } catch (error) { report('search', error); throw error; }
     },
     async getMediaSource(item, quality) {
       quality = quality || 'standard';
       try {
+        item = inputItem(item);
         if (adapter.getMediaSource) {
-          if (line.id === 'bili' && quality !== 'standard') return null;
+          if (line.id === 'bili' && quality !== 'standard' && !options.legacy) return null;
           const result = await adapter.getMediaSource(item, quality);
           return result ? playable(result, quality) : null;
         }
@@ -64,12 +83,12 @@ module.exports=(function createPlugin(options, createAdapter, dependencies) {
   if (options.srcUrl) plugin.srcUrl = options.srcUrl;
   for (const method of ['getMusicInfo', 'getLyric']) {
     if (typeof adapter[method] === 'function') plugin[method] = async function(item) {
-      try { return await adapter[method](item); }
+      try { return await adapter[method](inputItem(item)); }
       catch (error) { report(method, error); throw error; }
     };
   }
   return plugin;
-})({"line":{"id":"bili","name":"哔哩哔哩","searchApi":"biliSearchMusic","detailApi":"biliMusicDetail","levels":["bili192"],"enabled":true},"platform":"青听哔哩哔哩","srcUrl":"https://hanklzl.github.io/qingmusic-musicfree/qing-bili.js","version":"1.0.0","gatewayUrl":"https://musicserver.haitangw.cc/v1/music/resolve-url"},function createAdapter(ctx) {
+})({"line":{"id":"bili","name":"哔哩哔哩","searchApi":"biliSearchMusic","detailApi":"biliMusicDetail","levels":["bili192"],"enabled":true},"platform":"青听哔哩哔哩","primaryKey":["id"],"legacy":false,"srcUrl":"https://hanklzl.github.io/qingmusic-musicfree/qing-bili.js","version":"1.2.2","gatewayUrl":"https://musicserver.haitangw.cc/v1/music/resolve-url"},function createAdapter(ctx) {
   const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36';
   const headers = { Referer: 'https://www.bilibili.com/', 'User-Agent': userAgent };
   async function request(path, params) {
@@ -101,18 +120,24 @@ module.exports=(function createPlugin(options, createAdapter, dependencies) {
       const pages = data.pageinfo && data.pageinfo.video && data.pageinfo.video.pages || data.numPages;
       return { data: videos.map(mapVideo), isEnd: videos.length === 0 || (pages ? page >= Number(pages) : videos.length < 20) };
     },
-    async getMediaSource(item) {
+    async getMediaSource(item, quality = 'standard') {
+      const qualityRank = ['low', 'standard', 'high', 'super'].indexOf(quality);
+      if (qualityRank < 0) throw new Error('Unsupported Bilibili quality: ' + String(quality));
       const id = String(item.bvid || item.rid || item.id);
       const identity = id.startsWith('BV') ? { bvid: id } : { avid: String(item.aid || id) };
       let cid = item.cid;
       if (!cid) {
-        const pages = await request('/x/player/pagelist', identity);
+        // These two official endpoints use different names for a numeric video ID.
+        const pageIdentity = identity.bvid ? identity : { aid: identity.avid };
+        const pages = await request('/x/player/pagelist', pageIdentity);
         cid = pages && pages[0] && pages[0].cid;
       }
       if (!cid) throw new Error('Bilibili video has no cid');
       const data = await request('/x/player/playurl', Object.assign({}, identity, { cid, fnval: 16, fnver: 0, fourk: 1 }));
       const audio = data && data.dash && data.dash.audio || [];
-      const selected = audio.filter(track => track.baseUrl || track.base_url).sort((a, b) => Number(b.bandwidth || 0) - Number(a.bandwidth || 0))[0];
+      const sortedAudio = audio.filter(track => track.baseUrl || track.base_url).sort((a, b) => Number(a.bandwidth || 0) - Number(b.bandwidth || 0));
+      const audioIndex = !ctx.legacy || quality === 'super' ? sortedAudio.length - 1 : Math.min(qualityRank, sortedAudio.length - 1);
+      const selected = sortedAudio[audioIndex];
       if (!selected) throw new Error('Bilibili DASH audio unavailable');
       const referer = 'https://www.bilibili.com/video/' + (identity.bvid || 'av' + identity.avid);
       return { url: selected.baseUrl || selected.base_url, headers: { Referer: referer, 'User-Agent': userAgent }, userAgent };

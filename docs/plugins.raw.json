@@ -2,32 +2,32 @@
   "plugins": [
     {
       "name": "青听酷我",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-kw.js"
     },
     {
       "name": "青听酷狗",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-kg.js"
     },
     {
       "name": "青听网易",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-wy.js"
     },
     {
       "name": "青听QQ",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-tx.js"
     },
     {
       "name": "青听哔哩哔哩",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-bili.js"
     },
     {
       "name": "青听咪咕",
-      "version": "1.0.0",
+      "version": "1.2.2",
       "url": "https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/qing-mg.js"
     }
   ]

@@ -2,8 +2,26 @@
 (function(){var http=require("axios");var crypto=require("crypto-js");var he=require("he");
 module.exports=(function createPlugin(options, createAdapter, dependencies) {
   const line = options.line;
-  const adapter = createAdapter({ http: dependencies.http, crypto: dependencies.crypto, he: dependencies.he, line });
+  const adapter = createAdapter({ http: dependencies.http, crypto: dependencies.crypto, he: dependencies.he, line, legacy: !!options.legacy });
   const levels = { standard: 'standard', high: 'exhigh', super: 'lossless' };
+  function inputItem(item) {
+    const prepared = Object.assign({}, item);
+    prepared.rid = String(line.id === 'tx' ? item.songmid || item.rid || item.id || '' : item.rid || item.id || '');
+    return prepared;
+  }
+  function outputItem(item) {
+    const output = Object.assign({}, item, { id: String(item.id), platform: options.platform });
+    if (options.legacy && line.id === 'tx') {
+      output.id = String(item.songid || item.id);
+      output.songmid = String(item.songmid || item.rid || item.id);
+      output.rid = output.songmid;
+    }
+    if (options.legacy && line.id === 'kg') {
+      output.album_id = String(item.album_id || item.albumId || '');
+      output.album_audio_id = item.album_audio_id === undefined ? 0 : item.album_audio_id;
+    }
+    return output;
+  }
   function report(method, error) {
     console.error('[qingmusic] ' + method + ' failed: ' + String(error && error.message || error));
   }
@@ -26,25 +44,26 @@ module.exports=(function createPlugin(options, createAdapter, dependencies) {
     platform: options.platform,
     author: 'MusicFree QingMusic Adapter',
     version: options.version,
-    primaryKey: ['id'],
+    primaryKey: options.primaryKey || ['id'],
     cacheControl: 'no-cache',
     supportedSearchType: ['music'],
     defaultSearchType: 'music',
-    description: '青听配置适配：' + line.name + '。第三方接口可用性由上游决定；不提供青听专属解密。',
+    description: (options.legacy ? '旧元力插件身份兼容版；' : '') + '青听配置适配：' + line.name + '。第三方接口可用性由上游决定；不提供青听专属解密。',
     async search(query, page, type) {
       if (type && type !== 'music') return { data: [], isEnd: true };
       if (!Number.isInteger(page) || page < 1) throw new Error('INVALID_PAGE');
       try {
         const result = await adapter.search(query, page);
         if (!result || !Array.isArray(result.data)) throw new Error('INVALID_SEARCH_RESPONSE');
-        return { data: result.data.map(item => Object.assign({}, item, { id: String(item.id), platform: options.platform })), isEnd: !!result.isEnd };
+        return { data: result.data.map(outputItem), isEnd: !!result.isEnd };
       } catch (error) { report('search', error); throw error; }
     },
     async getMediaSource(item, quality) {
       quality = quality || 'standard';
       try {
+        item = inputItem(item);
         if (adapter.getMediaSource) {
-          if (line.id === 'bili' && quality !== 'standard') return null;
+          if (line.id === 'bili' && quality !== 'standard' && !options.legacy) return null;
           const result = await adapter.getMediaSource(item, quality);
           return result ? playable(result, quality) : null;
         }
@@ -64,12 +83,12 @@ module.exports=(function createPlugin(options, createAdapter, dependencies) {
   if (options.srcUrl) plugin.srcUrl = options.srcUrl;
   for (const method of ['getMusicInfo', 'getLyric']) {
     if (typeof adapter[method] === 'function') plugin[method] = async function(item) {
-      try { return await adapter[method](item); }
+      try { return await adapter[method](inputItem(item)); }
       catch (error) { report(method, error); throw error; }
     };
   }
   return plugin;
-})({"line":{"id":"tx","name":"小Q源","enabled":true,"searchApi":"txSearchMusic","detailApi":"txMusicDetail","levels":["standard","exhigh","lossless","sur","jymaster"]},"platform":"青听QQ","srcUrl":"https://hanklzl.github.io/qingmusic-musicfree/qing-tx.js","version":"1.0.0","gatewayUrl":"https://musicserver.haitangw.cc/v1/music/resolve-url"},function createAdapter(ctx) {
+})({"line":{"id":"tx","name":"小Q源","enabled":true,"searchApi":"txSearchMusic","detailApi":"txMusicDetail","levels":["standard","exhigh","lossless","sur","jymaster"]},"platform":"青听QQ","primaryKey":["id"],"legacy":false,"srcUrl":"https://hanklzl.github.io/qingmusic-musicfree/qing-tx.js","version":"1.2.2","gatewayUrl":"https://musicserver.haitangw.cc/v1/music/resolve-url"},function createAdapter(ctx) {
   const http = ctx.http;
   const headers = { Referer: 'https://y.qq.com/', 'User-Agent': 'Mozilla/5.0' };
   const decode = value => ctx.he.decode(String(value || '')).replace(/\r/g, '');

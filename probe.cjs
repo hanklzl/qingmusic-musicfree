@@ -33,21 +33,23 @@ async function main() {
   const qualities = arg('--qualities', 'standard').split(',');
   const limit = Number(arg('--tracks', '1'));
   const selected = arg('--ids', 'kw,kg,wy,tx,bili,mg').split(',');
+  const fixtures = args.includes('--fixtures') ? JSON.parse(await fs.readFile(arg('--fixtures'), 'utf8')) : null;
+  const prefix = arg('--variant', 'normal') === 'compat' ? 'yuanli-' : 'qing-';
   const modules = { axios: http, 'crypto-js': runtimeRequire('crypto-js'), he: runtimeRequire('he') };
   for (const key of Object.keys(modules)) modules[key].default = modules[key];
   const results = [];
   for (const id of selected) {
-    const result = { id, query, searchCount: 0, tracks: [] };
+    const result = { id, query: fixtures ? undefined : query, mode: fixtures ? 'saved-item-fixture' : 'search', searchCount: 0, tracks: [] };
     try {
-      const script = await fs.readFile(path.join(root, 'qing-' + id + '.js'), 'utf8');
+      const script = await fs.readFile(path.join(root, prefix + id + '.js'), 'utf8');
       const context = { module: { exports: {} }, console, require(name) {
         if (!modules[name]) throw new Error('Unsupported require: ' + name);
         return modules[name];
       } };
       vm.runInNewContext(script, context, { timeout: 5000 });
       const plugin = context.module.exports;
-      const search = await plugin.search(query, 1, 'music');
-      result.searchCount = search.data.length;
+      const search = fixtures ? { data: fixtures[id] || [] } : await plugin.search(query, 1, 'music');
+      if (!fixtures) result.searchCount = search.data.length;
       for (const item of search.data.slice(0, limit)) {
         const track = { title: item.title, artist: item.artist, rid: item.rid || item.id, media: [] };
         for (const quality of qualities) {

@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-20T14:13:59.575Z",
+  "results": [
+    {
+      "id": "tx",
+      "query": "海阔天空",
+      "mode": "search",
+      "searchCount": 30,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "rid": "001yS0N33yPm1B",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "faab01fcb756e0f2b28a061a5529c56767035e1d2877f56a21395997b79b3aad",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 990
+        }
+      ]
+    },
+    {
+      "id": "kg",
+      "query": "海阔天空",
+      "mode": "search",
+      "searchCount": 47,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "rid": "C41E80A18D1448FA47086372999C7F43",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "application/octet-stream",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "cb98c2bae299d73fe7c75b37617f59d2fefd96aaa6a48a58e0cc9ad10bbecd72",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 998
+        }
+      ]
+    }
+  ]
+}

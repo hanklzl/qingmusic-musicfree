@@ -42,17 +42,25 @@ module.exports = function createAdapter(ctx) {
     async getLyric(item) {
       let lyricUrl = item.lyricUrl;
       if (!lyricUrl) {
+        const lookupId = item.contentId || item.rid || item.id;
+        if (!lookupId) throw new Error('Migu lyric: missing song ID');
         const response = await ctx.http.get('https://c.musicapp.migu.cn/MIGUM3.0/resource/song/by-contentids/v2.0', {
-          headers, timeout: 15000, params: { contentId: String(item.rid || item.id) }
+          // Despite the parameter name, this public endpoint also accepts songId.
+          headers, timeout: 15000, params: { contentId: String(lookupId) }
         });
         const body = parse(response.data);
-        const song = body && body.resource && body.resource[0];
-        if (!song) throw new Error('Migu lyric: invalid song response');
+        if (!body || String(body.code) !== '000000' || !Array.isArray(body.data)) throw new Error('Migu lyric: invalid song response');
+        const song = body.data.find(candidate =>
+          (candidate.songId && String(candidate.songId) === String(item.rid || item.id)) ||
+          (item.contentId && String(candidate.contentId) === String(item.contentId)) ||
+          (item.copyrightId && String(candidate.copyrightId) === String(item.copyrightId))
+        );
+        if (!song) throw new Error('Migu lyric: song identity did not match');
         lyricUrl = song.lrcUrl || song.lyricUrl;
       }
-      if (!lyricUrl) return { rawLrc: '' };
+      if (!lyricUrl) throw new Error('Migu lyric: lyric URL unavailable');
       const response = await ctx.http.get(lyricUrl, { headers, timeout: 15000, responseType: 'text' });
-      if (typeof response.data !== 'string' || /^\s*</.test(response.data)) throw new Error('Migu lyric: invalid lyric response');
+      if (typeof response.data !== 'string' || !response.data.trim() || /^\s*</.test(response.data)) throw new Error('Migu lyric: invalid lyric response');
       return { rawLrc: response.data.replace(/\r/g, '') };
     }
   };

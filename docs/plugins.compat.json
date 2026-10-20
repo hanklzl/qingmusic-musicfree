@@ -1,0 +1,34 @@
+{
+  "plugins": [
+    {
+      "name": "元力KW",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-kw.js"
+    },
+    {
+      "name": "元力KG",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-kg.js"
+    },
+    {
+      "name": "元力WY",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-wy.js"
+    },
+    {
+      "name": "元力QQ",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-tx.js"
+    },
+    {
+      "name": "bilibili",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-bili.js"
+    },
+    {
+      "name": "元力MG",
+      "version": "1.2.2",
+      "url": "https://hanklzl.github.io/qingmusic-musicfree/yuanli-mg.js"
+    }
+  ]
+}
