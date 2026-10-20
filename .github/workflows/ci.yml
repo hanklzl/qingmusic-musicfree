@@ -1,0 +1,19 @@
+name: Plugin contracts
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Verify generated plugins match checked-in config and source
+        run: |
+          node build.cjs --source docs/qingmusic-config.json --base-url https://hanklzl.github.io/qingmusic-musicfree/ --raw-base-url https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/ --out docs
+          git diff --exit-code -- docs

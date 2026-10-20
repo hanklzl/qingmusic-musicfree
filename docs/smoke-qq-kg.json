@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-10-20T14:03:43.995Z",
+  "results": [
+    {
+      "id": "tx",
+      "query": "晴天",
+      "searchCount": 30,
+      "tracks": [
+        {
+          "title": "晴天",
+          "artist": "周杰伦",
+          "rid": "0039MnYb0qxYhV",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000375449",
+              "sampleSha256": "3e054841c765a73e640d1e14cce5ac8e580ba57d41b289c94185bb572585defa",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 1388
+        },
+        {
+          "title": "晴天 (Live)",
+          "artist": "周杰伦",
+          "rid": "004Fs2FP1EvZYc",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "4944330300000000004d5449",
+              "sampleSha256": "90737e347b670801eccfe791b3d18dd75fd1bcef6f4f145190c2682f05eae99d",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 879
+        }
+      ]
+    },
+    {
+      "id": "kg",
+      "query": "晴天",
+      "searchCount": 35,
+      "tracks": [
+        {
+          "title": "晴天",
+          "artist": "周杰伦",
+          "rid": "B3A52A7A958BF0AED0EBFBA2E9A818B7",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000375449",
+              "sampleSha256": "3e054841c765a73e640d1e14cce5ac8e580ba57d41b289c94185bb572585defa",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 1387
+        },
+        {
+          "title": "晴天",
+          "artist": "蓝心羽",
+          "rid": "48C685F679FFC7CF08B8A8341CA9DB44",
+          "media": [
+            {
+              "quality": "standard",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000245449",
+              "sampleSha256": "a922d4623f05c413e6caee02a023ccfc27f22d45c645817e4d9c2863e18252a2",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 968
+        }
+      ]
+    }
+  ]
+}

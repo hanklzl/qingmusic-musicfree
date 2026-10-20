@@ -1,0 +1,14 @@
+{
+  "name": "qingmusic-musicfree",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QingMusic JSON to standalone MusicFree plugins",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "build": "node build.cjs --base-url https://hanklzl.github.io/qingmusic-musicfree/ --raw-base-url https://raw.githubusercontent.com/hanklzl/qingmusic-musicfree/main/docs/ --out docs",
+    "probe": "node probe.cjs --plugins docs"
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": { "axios": "1.20.0", "crypto-js": "4.2.0", "he": "1.2.0" }
+}

@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-10-20T14:04:47.526Z",
+  "results": [
+    {
+      "id": "kw",
+      "query": "海阔天空",
+      "searchCount": 30,
+      "tracks": [
+        {
+          "title": "海阔天空 (Live)-时光音乐会",
+          "artist": "G.E.M.邓紫棋",
+          "rid": "321946135",
+          "media": [
+            {
+              "quality": "high",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "fffb90640000000000000000",
+              "sampleSha256": "22d2f61a7ce0c3a26d24d44402c8f99531f3e084fd524aa504763a3d1152e240",
+              "audio": true,
+              "decoded": true
+            },
+            {
+              "quality": "super",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "fffb90640000000000000000",
+              "sampleSha256": "22d2f61a7ce0c3a26d24d44402c8f99531f3e084fd524aa504763a3d1152e240",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 904
+        }
+      ]
+    },
+    {
+      "id": "kg",
+      "query": "海阔天空",
+      "searchCount": 47,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "rid": "C41E80A18D1448FA47086372999C7F43",
+          "media": [
+            {
+              "quality": "high",
+              "status": 206,
+              "mime": "application/octet-stream",
+              "bytes": 4096,
+              "signature": "494433030000001049084150",
+              "sampleSha256": "8bad81da5b81a33c9ee5d0132deb2565cde3818ebc33b3d458ac72370b7cada0",
+              "audio": true,
+              "decoded": true
+            },
+            {
+              "quality": "super",
+              "status": 206,
+              "mime": "application/octet-stream",
+              "bytes": 4096,
+              "signature": "664c61430000002210001000",
+              "sampleSha256": "2227197dfa7dd64758d89b5ef656d4f597128afdbfbf5d4a473d63af71cf978d",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 998
+        }
+      ]
+    },
+    {
+      "id": "wy",
+      "query": "海阔天空",
+      "searchCount": 30,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "artist": "Beyond",
+          "rid": "1357375695",
+          "media": [
+            {
+              "quality": "high",
+              "status": 206,
+              "mime": "audio/mpeg; charset=UTF-8",
+              "bytes": 4096,
+              "signature": "494433040000000000235453",
+              "sampleSha256": "65306faf0095561d9fd52f2842026b77942633e6672e3665912b0c6dcb21b821",
+              "audio": true,
+              "decoded": true
+            },
+            {
+              "quality": "super",
+              "status": 206,
+              "mime": "audio/mpeg; charset=UTF-8",
+              "bytes": 4096,
+              "signature": "664c61430000002204000400",
+              "sampleSha256": "7380a47690cc5f69a681206409a43d76ab8c494eaf6dcb44933e816817d4ca40",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 786
+        }
+      ]
+    },
+    {
+      "id": "tx",
+      "query": "海阔天空",
+      "searchCount": 30,
+      "tracks": [
+        {
+          "title": "海阔天空",
+          "artist": "BEYOND",
+          "rid": "001yS0N33yPm1B",
+          "media": [
+            {
+              "quality": "high",
+              "status": 206,
+              "mime": "audio/mpeg",
+              "bytes": 4096,
+              "signature": "494433030000000000415449",
+              "sampleSha256": "be275e9508490cbf71018b61ae206bc1066744ac60b53b40c37982d0b0631618",
+              "audio": true,
+              "decoded": true
+            },
+            {
+              "quality": "super",
+              "status": 206,
+              "mime": "audio/x-ogg",
+              "bytes": 4096,
+              "signature": "664c61430000002210001000",
+              "sampleSha256": "2227197dfa7dd64758d89b5ef656d4f597128afdbfbf5d4a473d63af71cf978d",
+              "audio": true,
+              "decoded": true
+            }
+          ],
+          "lyricLength": 990
+        }
+      ]
+    }
+  ]
+}
